@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Texture Mapping Assignment</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #000; /* Optional: Set a background color */
+      }
+      canvas {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Import Three.js library from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Import OrbitControls.js for camera control -->
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script>
+    <script>
+      // Initialize the scene, camera, and renderer
+      var scene = new THREE.Scene(); // Create a new Three.js scene
+      var camera = new THREE.PerspectiveCamera(
+        75, // Field of view angle
+        window.innerWidth / window.innerHeight, // Aspect ratio
+        0.1, // Near clipping plane
+        1000 // Far clipping plane
+      );
+      camera.position.z = 5; // Set the camera position on the z-axis
+
+      var renderer = new THREE.WebGLRenderer(); // Create a WebGL renderer
+      renderer.setSize(window.innerWidth, window.innerHeight); // Set the size of the rendering area
+      document.body.appendChild(renderer.domElement); // Add the renderer element to the document
+
+      // Add a directional light to the scene
+      var light = new THREE.DirectionalLight(0xffffff, 1); // White light with full intensity
+      light.position.set(0, 1, 1).normalize(); // Set the light's position and normalize it
+      scene.add(light); // Add the light to the scene
+
+      // Load textures for the cube
+      var loader = new THREE.TextureLoader(); // Create a new texture loader
+      var textures = [
+        loader.load("1.png"), // Load texture for the first face
+        loader.load("2.png"), // Load texture for the second face
+        loader.load("3.png"), // Load texture for the third face
+        loader.load("4.png"), // Load texture for the fourth face
+        loader.load("3.png"), // Reuse texture for the fifth face
+        loader.load("1.png"), // Reuse texture for the sixth face
+      ];
+
+      // Create a cube and apply the textures
+      var geometry = new THREE.BoxGeometry(2, 2, 2); // Define the cube's geometry
+      var materials = textures.map(
+        (texture) => new THREE.MeshBasicMaterial({ map: texture }) // Create materials with the loaded textures
+      );
+      var cube = new THREE.Mesh(geometry, materials); // Create a mesh with the geometry and materials
+      scene.add(cube); // Add the cube to the scene
+
+      // Define auto-rotation speed
+      var autoRotateSpeed = 0.01; // Speed at which the cube will auto-rotate
+
+      // Animation loop to continuously render the scene
+      function animate() {
+        requestAnimationFrame(animate); // Request the next animation frame
+
+        // Auto-rotate the cube
+        cube.rotation.x += autoRotateSpeed; // Rotate the cube around the x-axis
+        cube.rotation.y += autoRotateSpeed; // Rotate the cube around the y-axis
+
+        renderer.render(scene, camera); // Render the scene from the perspective of the camera
+      }
+
+      // Event listeners for manual control over the cube's rotation
+      document.addEventListener("keydown", function (event) {
+        switch (event.key) {
+          case "ArrowUp":
+            cube.rotation.x -= 0.1;
+            break; // Rotate upwards
+          case "ArrowDown":
+            cube.rotation.x += 0.1;
+            break; // Rotate downwards
+          case "ArrowLeft":
+            cube.rotation.y -= 0.1;
+            break; // Rotate left
+          case "ArrowRight":
+            cube.rotation.y += 0.1;
+            break; // Rotate right
+        }
+      });
+
+      // Variables to track mouse state and position
+      let isMouseDown = false;
+      let lastMouseX = 0;
+      let lastMouseY = 0;
+
+      // Event listener for mouse down event
+      document.addEventListener("mousedown", function (event) {
+        isMouseDown = true; // Set mouse down flag
+        lastMouseX = event.clientX; // Store initial mouse X position
+        lastMouseY = event.clientY; // Store initial mouse Y position
+      });
+
+      // Event listener for mouse move event
+      document.addEventListener("mousemove", function (event) {
+        if (isMouseDown) {
+          const deltaX = event.clientX - lastMouseX; // Calculate change in X position
+          const deltaY = event.clientY - lastMouseY; // Calculate change in Y position
+          cube.rotation.y += deltaX * 0.01; // Rotate cube based on X movement
+          cube.rotation.x += deltaY * 0.01; // Rotate cube based on Y movement
+          lastMouseX = event.clientX; // Update last mouse X position
+          lastMouseY = event.clientY; // Update last mouse Y position
+        }
+      });
+
+      // Event listener for mouse up event
+      document.addEventListener("mouseup", function () {
+        isMouseDown = false; // Reset mouse down flag
+      });
+
+      animate(); // Start the animation loop
+    </script>
+  </body>
+</html>
